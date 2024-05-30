@@ -1,10 +1,10 @@
 namespace ws2812b {
     //% shim=sendBufferAsm
-    export function sendBuffer(buf: Buffer, pin: DigitalPin) {
+    export function sendBuffer(buf: Buffer, pin: DigitalInOutPin) {
     }
 
     //% shim=setBufferMode
-    export function setBufferMode(pin: DigitalPin, mode: number) {
+    export function setBufferMode(pin: DigitalInOutPin, mode: number) {
 
     }
 
