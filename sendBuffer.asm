@@ -16,7 +16,7 @@ sendBufferAsm:
     ; setup pin as digital
     mov r0, r6
     movs r1, #0
-    bl pins::digitalWritePin
+    bl pins::DigitalInOutPin
     
     ; load pin address
     mov r0, r6
