@@ -1,67 +1,56 @@
-sendBufferAsm:
+push {r4,r5,r6,r7,lr}
 
-    push {r4,r5,r6,r7,lr}
-    
-    mov r4, r0 ; save buff
-    mov r6, r1 ; save pin
-    
-    mov r0, r4
-    bl BufferMethods::length
-    mov r5, r0
-    
-    mov r0, r4
-    bl BufferMethods::getBytes
-    mov r4, r0
-    
-    ; setup pin as digital
-    mov r0, r6
-    movs r1, #0
-    bl pins::DigitalInOutPin
-    
-    ; load pin address
-    mov r0, r6
-    bl pins::getPinAddress
+mov r4, r0 ; 保存 buff
+mov r6, r1 ; 保存 pin
 
-    ldr r0, [r0, #8] ; get mbed DigitalOut from MicroBitPin
-    ldr r1, [r0, #4] ; r1-mask for this pin
-    ldr r2, [r0, #16] ; r2-clraddr
-    ldr r3, [r0, #12] ; r3-setaddr
-    
-    cpsid i ; disable irq
-    
-    b .start
-    
-.nextbit:               ;            C0
-    str r1, [r3, #0]    ; pin := hi  C2
-    tst r6, r0          ;            C3
-    bne .islate         ;            C4
-    str r1, [r2, #0]    ; pin := lo  C6
+mov r0, r4
+bl BufferMethods::length
+mov r5, r0
+
+mov r0, r4
+bl BufferMethods::getBytes
+mov r4, r0
+
+; 設置引腳為數位輸出
+mov r0, #DAL.CFG_PIN_ACCELEROMETER_SDA
+movs r1, #1 ; 設置為輸出
+bl pins.pinByCfg
+
+; 加載引腳地址
+ldr r0, =DAL.CFG_PIN_ACCELEROMETER_SDA
+ldr r0, [r0]
+
+cpsid i ; 禁止 irq
+
+b .start
+
+.nextbit:
+    str r0, [r0, #4] ; 引腳設置為高電平
+    tst r6, r0
+    bne .islate
+    str r0, [r0, #8] ; 引腳設置為低電平
 .islate:
-    lsrs r6, r6, #1     ; r6 >>= 1   C7
-    bne .justbit        ;            C8
-    
-    ; not just a bit - need new byte
-    adds r4, #1         ; r4++       C9
-    subs r5, #1         ; r5--       C10
-    bcc .stop           ; if (r5<0) goto .stop  C11
+    lsrs r6, r6, #1
+    bne .justbit
+
+    ; 不僅僅是一個位 - 需要新的字節
+    adds r4, #1
+    subs r5, #1
+    bcc .stop
 .start:
-    movs r6, #0x80      ; reset mask C12
-    nop                 ;            C13
+    movs r6, #0x80
 
-.common:               ;             C13
-    str r1, [r2, #0]   ; pin := lo   C15
-    ; always re-load byte - it just fits with the cycles better this way
-    ldrb r0, [r4, #0]  ; r0 := *r4   C17
-    b .nextbit         ;             C20
+.common:
+    str r0, [r0, #8] ; 引腳設置為低電平
+    ; 始終重新加載字節 - 這樣做更符合週期
+    ldrb r0, [r4, #0]
+    b .nextbit
 
-.justbit: ; C10
-    ; no nops, branch taken is already 3 cycles
-    b .common ; C13
+.justbit:
+    b .common
 
-.stop:    
-    str r1, [r2, #0]   ; pin := lo
-    cpsie i            ; enable irq
+.stop:
+    str r0, [r0, #8] ; 引腳設置為低電平
+    cpsie i ; 啟用 irq
 
     pop {r4,r5,r6,r7,pc}
-
-
