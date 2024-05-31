@@ -3,16 +3,9 @@ push {r4,r5,r6,r7,lr}
 mov r4, r0 ; 保存 buff
 mov r6, r1 ; 保存 pin
 
-mov r0, r4
-bl BufferMethods::length
-mov r5, r0
-
-mov r0, r4
-bl BufferMethods::getBytes
-mov r4, r0
-
-; 設置引腳為數位輸出
 mov r0, #DAL.CFG_PIN_ACCELEROMETER_SCL
+ldr r0, [r0] ; 將地址中的值加載到 r0 中
+
 bl pins.pinByCfg
 mov r0, r0, lsl #1 ; 加上 .digitalWrite 的偏移量
 
