@@ -12,13 +12,9 @@ bl BufferMethods::getBytes
 mov r4, r0
 
 ; 設置引腳為數位輸出
-mov r0, #DAL.CFG_PIN_ACCELEROMETER_SDA
-movs r1, #1 ; 設置為輸出
+mov r0, #DAL.CFG_PIN_ACCELEROMETER_SCL
 bl pins.pinByCfg
-
-; 加載引腳地址
-ldr r0, =DAL.CFG_PIN_ACCELEROMETER_SDA
-ldr r0, [r0]
+mov r0, r0, lsl #1 ; 加上 .digitalWrite 的偏移量
 
 cpsid i ; 禁止 irq
 
