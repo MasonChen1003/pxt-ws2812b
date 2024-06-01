@@ -16,9 +16,18 @@ mov r5, r0       ; 保存緩沖區的長度到 r5 中
 ldr r0, [r4, #0] ; 加載緩沖區地址
 mov r4, r0       ; 保存緩沖區的地址到 r4 中
 
+.section .data
+GPIO12_ADDR:
+    .word 0x40014030 ; 將 GPIO12 的地址存儲在數據段中
+
+.section .text
+.global _start
+
+_start:
+    ldr r0, GPIO12_ADDR ; 從數據段中加載 GPIO12 的地址到寄存器 r0 中
 ; 加載引腳的地址
-mov r0, 0x40014030 ; 將立即值 0x40014030 加載到寄存器 r0 中
-ldr r0, [r0, #0]    ; 加載 GPIO12 的地址到 r0 中
+;mov r0, 0x40014030 ; 將立即值 0x40014030 加載到寄存器 r0 中
+;ldr r0, [r0, #0]    ; 加載 GPIO12 的地址到 r0 中
 
 ; 加載 GPIO 控制寄存器的地址
 ldr r1, [r0, #0x4]  ; 加載 GPIO 控制寄存器的地址到 r1 中（設置高電平）
