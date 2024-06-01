@@ -1,8 +1,7 @@
 //% inline
-function setPinHigh(pin: DigitalInOutPin): void {
-    pins.pinByCfg(pin).digitalWrite(true);
+function setPinState(pin: DigitalInOutPin, state: boolean): void {
+    pins.pinByCfg(pin).digitalWrite(state);
 }
-
 
 namespace ws2812b {
     //% shim=sendBufferAsm
