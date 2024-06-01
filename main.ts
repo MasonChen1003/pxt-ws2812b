@@ -1,6 +1,6 @@
 
 namespace ws2812b {
-    // 定义设置引脚状态的函数
+    //% shim=setPinState
     export function setPinState(pin: number, state: boolean): void {
     pins.pinByCfg(pin).digitalWrite(state);
    }
