@@ -1,9 +1,8 @@
 sendBufferAsm:
-
 ; 將給定的 ARM 組合語言代碼轉換為 RP2040 上的組合語言代碼
 
 ; 將寄存器保存到堆棧上
-push {r4,r5,r6,r7,lr}
+push {r4-r7, lr}
 
 ; 將緩沖區和引腳號保存到寄存器中
 mov r4, r0 ; 保存緩沖區
@@ -50,8 +49,8 @@ b .start
 
 .common:
     str r2, [r2]    ; 引腳設置為低電平
-    ldr r0, [r4]   ; 加載下一個字節到 r0 中
-    b .nextbit     ; 處理下一個位
+    ldrb r0, [r4, #0]  ; r0 := *r4   C17
+    b .nextbit      ; 處理下一個位
 
 .justbit:
     b .common       ; 繼續處理下一個位
@@ -60,4 +59,4 @@ b .start
     str r2, [r2]   ; 引腳設置為低電平
     cpsie i        ; 啟用 IRQ 中斷
 
-    pop {r4,r5,r6,r7,pc} ; 恢復寄存器並返回
+    pop {r4-r7, pc} ; 恢復寄存器並返回
