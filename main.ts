@@ -1,7 +1,7 @@
 
 namespace ws2812b {
     // 定义设置引脚状态的函数
-    function setPinState(pin: number, state: boolean): void {
+    export function setPinState(pin: number, state: boolean): void {
     pins.pinByCfg(pin).digitalWrite(state);
    }
 
