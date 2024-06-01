@@ -10,18 +10,10 @@ sendBufferAsm:
     bl pins::pinByCfg   ; 获取引脚配置
     mov r6, r0           ; r6 - 引脚对象
 
-    mov r0, r4
-    bl BufferMethods::length
-    mov r5, r0           ; buffer 长度
-
-    mov r0, r4
-    bl BufferMethods::getBytes
-    mov r4, r0           ; buffer 数据
-
     ; 设置 pin 为 digital
     mov r0, r6           ; 引脚对象
-    movs r1, #0
-    bl DigitalInOutPin::setDigitalValue  ; 设置为低电平
+    movs r1, #1          ; 设置为高电平
+    bl DigitalInOutPin::writeDigitalValue  ; 写入数字值
 
     ; 获取 pin 地址
     mov r0, r6
@@ -68,5 +60,3 @@ sendBufferAsm:
     cpsie i            ; 启用中断
 
     pop {r4, r5, r6, r7, pc}
-
-
