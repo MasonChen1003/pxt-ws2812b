@@ -50,7 +50,7 @@ b .start
 
 .common:
     str r2, [r2]    ; 引腳設置為低電平
-    ldrb r0, [r4]   ; 加載下一個字節到 r0 中
+    ldr r0, [r4]   ; 加載下一個字節到 r0 中
     b .nextbit     ; 處理下一個位
 
 .justbit:
