@@ -1,4 +1,3 @@
-//% inline
 function setPinState(pin: number, state: boolean): void {
     pins.pinByCfg(pin).digitalWrite(state);
 }
