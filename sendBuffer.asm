@@ -1,62 +1,63 @@
 sendBufferAsm:
 
-    push {r4, r5, r6, r7, lr}
+; 將給定的 ARM 組合語言代碼轉換為 RP2040 上的組合語言代碼
 
-    mov r4, r0           ; 保存 buffer
-    mov r6, r1           ; 保存 pin
+; 將寄存器保存到堆棧上
+push {r4-r7, lr}
 
-    mov r0, r6
-    movs r1, #0
-    bl pins::pinByCfg   ; 获取引脚配置
-    mov r6, r0           ; r6 - 引脚对象
+; 將緩沖區和引腳號保存到寄存器中
+mov r4, r0 ; 保存緩沖區
+mov r6, r1 ; 保存引腳
 
-    ; 设置 pin 为 digital
-    mov r0, r6           ; 引脚对象
-    movs r1, #1          ; 设置为高电平
-    bl setPinState       ; 调用设置引脚状态的函数
+; 獲取緩沖區的長度
+ldr r0, [r4, #4] ; 加載緩沖區地址中的長度
+mov r5, r0       ; 保存緩沖區的長度到 r5 中
 
-    ; 获取 pin 地址
-    mov r0, r6
-    bl DigitalInOutPin::getMicroBitPinAddress  ; 获取 MicroBitPin 地址
+; 加載緩沖區的地址
+ldr r0, [r4, #0] ; 加載緩沖區地址
+mov r4, r0       ; 保存緩沖區的地址到 r4 中
 
-    ldr r0, [r0, #8]     ; 从 MicroBitPin 获取 mbed DigitalOut
-    ldr r1, [r0, #4]     ; r1 - 该 pin 的掩码
-    ldr r2, [r0, #16]    ; r2 - 清除地址
-    ldr r3, [r0, #12]    ; r3 - 设置地址
+; 加載引腳的地址
+ldr r0, =0x40014030 ; RP2040 GPIO 控制器中 GPIO12 的地址
+ldr r0, [r0, #0]    ; 加載 GPIO12 的地址到 r0 中
 
-    cpsid i              ; 禁用中断
+; 加載 GPIO 控制寄存器的地址
+ldr r1, [r0, #0x4]  ; 加載 GPIO 控制寄存器的地址到 r1 中（設置高電平）
+ldr r2, [r0, #0x8]  ; 加載 GPIO 控制寄存器的地址到 r2 中（設置低電平）
 
-    b .start
+cpsid i ; 禁用 IRQ 中斷
 
-.nextbit:               ; C0
-    str r1, [r3, #0]    ; pin := 高电平  C2
-    tst r6, r0          ; 测试最高位  C3
-    bne .islate         ; 如果最高位为 1  C4
-    str r1, [r2, #0]    ; pin := 低电平  C6
+b .start
+
+.nextbit:
+    str r1, [r1]    ; 引腳設置為高電平
+    tst r6, r0      ; 檢查是否到達緩沖區結尾
+    bne .islate     ; 如果沒有，則檢查是否為1
+    b .stop         ; 如果到達結尾，則停止
+
 .islate:
-    lsrs r6, r6, #1     ; r6 >>= 1   C7
-    bne .justbit        ; 如果还有位要发送  C8
-    
-    ; 不是只有一位，需要新字节
-    adds r4, #1         ; r4++       C9
-    subs r5, #1         ; r5--       C10
-    bcc .stop           ; 如果 r5 < 0 跳转到 stop  C11
+    lsrs r6, r6, #1 ; r6 右移一位
+    bne .justbit    ; 如果 r6 不為零，則繼續處理下一個位
+
+    ; 如果 r6 為零，則需要加載下一個字節
+    adds r4, #1     ; 緩沖區地址加 1
+    subs r5, #1     ; 緩沖區長度減 1
+    bcc .stop       ; 如果緩沖區長度小於 0，則停止
+
 .start:
-    movs r6, #0x80      ; 重置掩码  C12
-    nop                 ; 空操作     C13
+    movs r6, #0x80  ; 重置掩碼
+    nop             ; 空指令
 
-.common:               ; C13
-    str r1, [r2, #0]   ; pin := 低电平   C15
-    ; 始终重新加载字节 - 这样循环更紧凑
-    ldrb r0, [r4, #0]  ; r0 := *r4   C17
-    b .nextbit         ; 跳转到 nextbit  C20
+.common:
+    str r2, [r2]    ; 引腳設置為低電平
+    ldrb r0, [r4]   ; 加載下一個字節到 r0 中
+    b .nextbit     ; 處理下一個位
 
-.justbit: ; C10
-    ; 无需空操作，分支已经占用 3 个周期
-    b .common ; C13
+.justbit:
+    b .common       ; 繼續處理下一個位
 
-.stop:    
-    str r1, [r2, #0]   ; pin := 低电平
-    cpsie i            ; 启用中断
+.stop:
+    str r2, [r2]   ; 引腳設置為低電平
+    cpsie i        ; 啟用 IRQ 中斷
 
-    pop {r4, r5, r6, r7, pc}
+    pop {r4-r7, pc} ; 恢復寄存器並返回
