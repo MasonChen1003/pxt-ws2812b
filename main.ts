@@ -1,5 +1,5 @@
 //% inline
-function setPinState(pin: DigitalInOutPin, state: boolean): void {
+function setPinState(pin: number, state: boolean): void {
     pins.pinByCfg(pin).digitalWrite(state);
 }
 
