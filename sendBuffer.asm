@@ -13,7 +13,7 @@ sendBufferAsm:
     ; 设置 pin 为 digital
     mov r0, r6           ; 引脚对象
     movs r1, #1          ; 设置为高电平
-    bl DigitalInOutPin::writeDigitalValue  ; 写入数字值
+    bl DigitalInOutPin::digitalWrite  ; 写入数字值
 
     ; 获取 pin 地址
     mov r0, r6
