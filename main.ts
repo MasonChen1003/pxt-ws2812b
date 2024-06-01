@@ -1,3 +1,9 @@
+//% inline
+function setPinHigh(pin: DigitalInOutPin): void {
+    pins.pinByCfg(pin).digitalWrite(true);
+}
+
+
 namespace ws2812b {
     //% shim=sendBufferAsm
     export function sendBuffer(buf: Buffer, pin: DigitalInOutPin) {
