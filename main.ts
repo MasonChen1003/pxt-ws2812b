@@ -1,8 +1,10 @@
-function setPinState(pin: number, state: boolean): void {
-    pins.pinByCfg(pin).digitalWrite(state);
-}
 
 namespace ws2812b {
+    // 定义设置引脚状态的函数
+    function setPinState(pin: number, state: boolean): void {
+    pins.pinByCfg(pin).digitalWrite(state);
+   }
+
     //% shim=sendBufferAsm
     export function sendBuffer(buf: Buffer, pin: DigitalInOutPin) {
     }
